@@ -41,6 +41,13 @@ export const getProductsBySupplier = async (req: Request, res: Response) => {
 export const createProduct = async (req: Request, res: Response) => {
     try {
         const productData = req.body;
+
+        // Check if a product with the same unique characteristics already exists
+        const existingProduct = await Product.findOne({ name: productData.name }); // Replace 'name' with your unique field
+        if (existingProduct) {
+            return res.status(400).json({ message: 'Product with this name already exists.' }); // Adjust the error message accordingly
+        }
+
         const newProduct = new Product(productData);
         await newProduct.save();
 

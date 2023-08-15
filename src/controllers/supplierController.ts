@@ -34,9 +34,17 @@ export const getSupplier = async (req: Request, res: Response) => {
 
 
 // Create a new supplier
+
 export const createSupplier = async (req: Request, res: Response) => {
     try {
         const supplierData = req.body;
+
+        // Check if a supplier with the same unique characteristics already exists
+        const existingSupplier = await Supplier.findOne({ name: supplierData.name }); // Replace 'name' with your unique field
+        if (existingSupplier) {
+            return res.status(400).json({ message: 'Supplier with this name already exists.' }); // Adjust the error message accordingly
+        }
+
         const newSupplier = new Supplier(supplierData);
         await newSupplier.save();
         res.status(201).json(newSupplier);
