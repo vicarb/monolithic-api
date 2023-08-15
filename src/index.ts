@@ -1,7 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db';  // Import the connectDB function
-import supplierRoutes from './routes/supplierRoutes';  // Make sure the path is correct
+import supplierRoutes from './routes/supplierRoutes'; // Make sure the path is correct
+import productRoutes from './routes/productRoutes'; 
 import cors from 'cors';
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 
 // Use the supplier routes
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/products', productRoutes);
 
 // Basic Route
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
