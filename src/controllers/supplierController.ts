@@ -80,7 +80,8 @@ export const deleteSupplier = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "Supplier not found" });
         }
 
-        res.status(200).json({ message: "Supplier deleted", supplier: deletedSupplier });
+        res.status(204).json({ message: "Supplier deleted", supplier: deletedSupplier });
+
     } catch (error) {
         res.status(500).json({ message: "Error deleting supplier", error });
     }
