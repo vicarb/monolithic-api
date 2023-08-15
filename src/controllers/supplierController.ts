@@ -13,6 +13,7 @@ export const getSuppliers = async (req: Request, res: Response) => {
 
 // Fetch a specific supplier
 export const getSupplier = async (req: Request, res: Response) => {
+    console.log("req body",req.body); // Debug log here
     try {
         const { id } = req.params;
         const supplier = await Supplier.findById(id);
@@ -21,6 +22,7 @@ export const getSupplier = async (req: Request, res: Response) => {
         }
         res.status(200).json(supplier);
     } catch (error) {
+        console.log(error); 
         res.status(500).json({ message: "Error fetching supplier", error });
     }
 };
