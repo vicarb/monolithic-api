@@ -4,6 +4,9 @@ import connectDB from './config/db';  // Import the connectDB function
 import supplierRoutes from './routes/supplierRoutes'; // Make sure the path is correct
 import productRoutes from './routes/productRoutes'; 
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from '../swaggerConfig';
+
 dotenv.config();
 
 // Connect to the database
@@ -17,6 +20,7 @@ app.use(cors());
 
 // Middleware to parse incoming requests with JSON payloads
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use((req, res, next) => {
     console.log(`Received ${req.method} request to ${req.url}`);
     next();
