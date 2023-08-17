@@ -3,7 +3,7 @@ import Product from '../models/Product';
 import Supplier from '../models/Supplier';
 import { Storage } from '@google-cloud/storage';
 import { v4 as uuidv4 } from 'uuid';
-
+import path from 'path';
 const storage = new Storage();
 const bucket = storage.bucket('b2b-bucket-v2');
 
@@ -52,32 +52,48 @@ export const logRequest = (req: Request, res: Response, next: NextFunction) => {
 // Create a new product
 export const createProduct = [
     async (req: Request, res: Response, next: NextFunction) => {
-      if (!req.files) {
-        return next();
-      }
-  
-      const filesArray = Array.isArray(req.files) ? req.files : Object.values(req.files);
-      
-      const promises = filesArray.map((file: any) => {
-        const blob = bucket.file(uuidv4() + file.originalname);
-        const blobStream = blob.createWriteStream({
-          metadata: { contentType: file.mimetype },
+        if (!req.files) {
+          return next();
+        }
+    
+        const filesArray = Array.isArray(req.files) ? req.files : Object.values(req.files);
+        const flattenedFiles = filesArray.flat(); // Flattening the array
+        console.log('Flattened files array:', flattenedFiles);
+    
+        const promises = flattenedFiles.map((file: any) => {
+          console.log('Processing file:', file.originalname);
+          const extension = path.extname(file.originalname);
+          const filename = uuidv4() + extension;
+          console.log('Generated filename:', filename);
+          const blob = bucket.file(filename);
+          const blobStream = blob.createWriteStream({
+            metadata: { contentType: file.mimetype },
+          });
+    
+          return new Promise<string>((resolve, reject) => {
+            blobStream.on('finish', () => {
+              const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+              resolve(publicUrl);
+            });
+            blobStream.on('error', (err) => {
+              console.error('Error during blob streaming:', err);
+              reject(err);
+            });
+            blobStream.end(file.buffer);
+          });
         });
-  
-        return new Promise<string>((resolve, reject) => {
-          blobStream.on('finish', () => resolve(blob.name));
-          blobStream.on('error', reject);
-          blobStream.end(file.buffer);
-        });
-      });
-  
-      Promise.all(promises)
-        .then((fileNames) => {
-          req.body.images = fileNames;
-          next();
-        })
-        .catch(next);
-    },
+    
+        Promise.all(promises)
+          .then((fileNames) => {
+            console.log('All files processed:', fileNames);
+            req.body.images = fileNames;
+            next();
+          })
+          .catch((err) => {
+            console.error('Error during file processing:', err);
+            next(err);
+          });
+      },
     async (req: Request, res: Response) => {
       try {
         const images = req.body.images || [];
@@ -112,8 +128,6 @@ export const createProduct = [
       }
     }
   ];
-  
-
 // Update a product's details
 export const updateProduct = async (req: Request, res: Response) => {
     try {
