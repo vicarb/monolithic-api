@@ -1,6 +1,12 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
 import Supplier from '../models/Supplier';
+import { Storage } from '@google-cloud/storage';
+import { v4 as uuidv4 } from 'uuid';
+
+const storage = new Storage();
+const bucket = storage.bucket('b2b-bucket-v2');
+
 
 // Fetch all products
 export const getProducts = async (req: Request, res: Response) => {
@@ -37,32 +43,76 @@ export const getProductsBySupplier = async (req: Request, res: Response) => {
     }
 };
 
+export const logRequest = (req: Request, res: Response, next: NextFunction) => {
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    next();
+  };
+  
 // Create a new product
-export const createProduct = async (req: Request, res: Response) => {
-    try {
+export const createProduct = [
+    async (req: Request, res: Response, next: NextFunction) => {
+      if (!req.files) {
+        return next();
+      }
+  
+      const filesArray = Array.isArray(req.files) ? req.files : Object.values(req.files);
+      
+      const promises = filesArray.map((file: any) => {
+        const blob = bucket.file(uuidv4() + file.originalname);
+        const blobStream = blob.createWriteStream({
+          metadata: { contentType: file.mimetype },
+        });
+  
+        return new Promise<string>((resolve, reject) => {
+          blobStream.on('finish', () => resolve(blob.name));
+          blobStream.on('error', reject);
+          blobStream.end(file.buffer);
+        });
+      });
+  
+      Promise.all(promises)
+        .then((fileNames) => {
+          req.body.images = fileNames;
+          next();
+        })
+        .catch(next);
+    },
+    async (req: Request, res: Response) => {
+      try {
+        const images = req.body.images || [];
         const productData = req.body;
-
+        const mainImage = images[0]; // Assuming the main image is the first one
+        const additionalImages = images.slice(1); // The rest are additional images
+  
         // Check if a product with the same unique characteristics already exists
-        const existingProduct = await Product.findOne({ name: productData.name }); // Replace 'name' with your unique field
+        const existingProduct = await Product.findOne({ name: productData.name });
         if (existingProduct) {
-            return res.status(400).json({ message: 'Product with this name already exists.' }); // Adjust the error message accordingly
+          return res.status(400).json({ message: 'Product with this name already exists.' });
         }
-
-        const newProduct = new Product(productData);
+  
+        const newProduct = new Product({
+          ...productData,
+          mainImage,
+          additionalImages,
+        });
+  
         await newProduct.save();
-
+  
         // Find the supplier and add the product to the products array
         const supplier = await Supplier.findById(productData.supplier);
         if (supplier) {
-            supplier.products.push(newProduct._id);
-            await supplier.save();
+          supplier.products.push(newProduct._id);
+          await supplier.save();
         }
-
+  
         res.status(201).json(newProduct);
-    } catch (error) {
+      } catch (error) {
         res.status(500).json({ message: "Error creating product", error });
+      }
     }
-};
+  ];
+  
 
 // Update a product's details
 export const updateProduct = async (req: Request, res: Response) => {

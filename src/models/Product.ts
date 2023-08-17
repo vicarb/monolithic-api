@@ -5,7 +5,8 @@ interface IProduct extends Document {
     description: string;
     price: number;
     supplier: Schema.Types.ObjectId; // Reference to the supplier
-    // Add other fields as needed
+    mainImage: string; // URL for the main product image
+    additionalImages: string[]; // Array of URLs for additional images
 }
 
 const ProductSchema: Schema = new Schema({
@@ -25,10 +26,16 @@ const ProductSchema: Schema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Supplier',
         required: true
+    },
+    mainImage: {
+        type: String,
+        required: true // or false, depending on your use case
+    },
+    additionalImages: {
+        type: [String], // Array of strings
+        required: false // or true, depending on your use case
     }
-    // Add other fields as needed
 });
 
 const Product = mongoose.model<IProduct>('Product', ProductSchema);
 export default Product;
-

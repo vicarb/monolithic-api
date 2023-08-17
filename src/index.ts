@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';  // Import the connectDB function
 import supplierRoutes from './routes/supplierRoutes'; // Make sure the path is correct
 import productRoutes from './routes/productRoutes'; 
+import testRoute from './routes/testRoute';
+
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { specs } from '../swaggerConfig';
@@ -30,6 +32,8 @@ app.use((req, res, next) => {
 // Use the supplier routes
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api', testRoute);
+
 
 // Basic Route
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
