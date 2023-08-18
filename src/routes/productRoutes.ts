@@ -39,6 +39,6 @@ router
 
 
   router
-    .route('/featured')
+    .route('/filtered/featured')
     .get(getFeaturedProducts);    
 export default router;

@@ -163,6 +163,8 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const getFeaturedProducts = async (req: Request, res: Response) => {
   try {
+      console.log("this is req--->", req);
+      
       const products = await Product.find({ featured: true });
       res.status(200).json(products);
   } catch (error) {
