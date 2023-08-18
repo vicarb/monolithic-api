@@ -160,3 +160,12 @@ export const deleteProduct = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Error deleting product", error });
     }
 };
+
+export const getFeaturedProducts = async (req: Request, res: Response) => {
+  try {
+      const products = await Product.find({ featured: true });
+      res.status(200).json(products);
+  } catch (error) {
+      res.status(500).json({ message: "Error fetching featured products", error });
+  }
+};

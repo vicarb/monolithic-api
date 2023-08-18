@@ -7,7 +7,8 @@ import {
     getProductsBySupplier,
     createProduct, 
     updateProduct, 
-    deleteProduct 
+    deleteProduct,
+    getFeaturedProducts
 } from '../controllers/productController';
 
 const multerStorage = multer.memoryStorage();
@@ -36,4 +37,8 @@ router
     .route('/supplier/:supplierId')
     .get(getProductsBySupplier); // Fetch all products for a specific supplier
 
+
+  router
+    .route('/featured')
+    .get(getFeaturedProducts);    
 export default router;

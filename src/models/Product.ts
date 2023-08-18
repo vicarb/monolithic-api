@@ -7,6 +7,8 @@ interface IProduct extends Document {
     supplier: Schema.Types.ObjectId; // Reference to the supplier
     mainImage: string; // URL for the main product image
     additionalImages: string[]; // Array of URLs for additional images
+    featured: boolean;
+    
 }
 
 const ProductSchema: Schema = new Schema({
@@ -34,6 +36,11 @@ const ProductSchema: Schema = new Schema({
     additionalImages: {
         type: [String], // Array of strings
         required: false // or true, depending on your use case
+    },
+    featured: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 });
 
