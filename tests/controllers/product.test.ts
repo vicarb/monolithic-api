@@ -16,7 +16,7 @@ describe('Product Routes', function() {
   });
 
   it('should fetch a specific product by ID', (done) => {
-    const productId = 'some-product-id'; // Replace with a valid ID
+    const productId = '64dd86863d7ddcaa862f21a4'; // Replace with a valid ID
     request(app)
       .get(`/api/products/${productId}`)
       .end((err, res) => {

@@ -7,6 +7,7 @@ const connectDB = async (): Promise<void> => {
     // Event listeners for various MongoDB events
     mongoose.connection.on('connecting', () => {
         console.log('Connecting to MongoDB...');
+        console.log(process.env.MONGODB_URI);
     });
 
     mongoose.connection.on('connected', () => {
