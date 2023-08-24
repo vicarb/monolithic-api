@@ -90,7 +90,7 @@ export const createProduct = [
             next();
           })
           .catch((err) => {
-            console.error('Error during file processing:', err);
+
             next(err);
           });
       },
