@@ -51,83 +51,93 @@ export const logRequest = (req: Request, res: Response, next: NextFunction) => {
   
 // Create a new product
 export const createProduct = [
-    async (req: Request, res: Response, next: NextFunction) => {
-        if (!req.files) {
-          return next();
-        }
-    
-        const filesArray = Array.isArray(req.files) ? req.files : Object.values(req.files);
-        const flattenedFiles = filesArray.flat(); // Flattening the array
-        console.log('Flattened files array:', flattenedFiles);
-    
-        const promises = flattenedFiles.map((file: any) => {
-          console.log('Processing file:', file.originalname);
-          const extension = path.extname(file.originalname);
-          const filename = uuidv4() + extension;
-          console.log('Generated filename:', filename);
-          const blob = bucket.file(filename);
-          const blobStream = blob.createWriteStream({
-            metadata: { contentType: file.mimetype },
-          });
-    
-          return new Promise<string>((resolve, reject) => {
-            blobStream.on('finish', () => {
-              const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-              resolve(publicUrl);
-            });
-            blobStream.on('error', (err) => {
-              console.error('Error during blob streaming:', err);
-              reject(err);
-            });
-            blobStream.end(file.buffer);
-          });
-        });
-    
-        Promise.all(promises)
-          .then((fileNames) => {
-            console.log('All files processed:', fileNames);
-            req.body.images = fileNames;
-            next();
-          })
-          .catch((err) => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    console.log('Incoming request files:', req.files);
+    console.log('Incoming request body:', req.body);
 
-            next(err);
-          });
-      },
-    async (req: Request, res: Response) => {
-      try {
-        const images = req.body.images || [];
-        const productData = req.body;
-        const mainImage = images[0]; // Assuming the main image is the first one
-        const additionalImages = images.slice(1); // The rest are additional images
-  
-        // Check if a product with the same unique characteristics already exists
-        const existingProduct = await Product.findOne({ name: productData.name });
-        if (existingProduct) {
-          return res.status(400).json({ message: 'Product with this name already exists.' });
-        }
-  
-        const newProduct = new Product({
-          ...productData,
-          mainImage,
-          additionalImages,
-        });
-  
-        await newProduct.save();
-  
-        // Find the supplier and add the product to the products array
-        const supplier = await Supplier.findById(productData.supplier);
-        if (supplier) {
-          supplier.products.push(newProduct._id);
-          await supplier.save();
-        }
-  
-        res.status(201).json(newProduct);
-      } catch (error) {
-        res.status(500).json({ message: "Error creating product", error });
-      }
+    if (!req.files) {
+      return next();
     }
-  ];
+
+    const filesArray = Array.isArray(req.files) ? req.files : Object.values(req.files);
+    const flattenedFiles = filesArray.flat();
+    console.log('Flattened files array:', flattenedFiles);
+
+    const promises = flattenedFiles.map((file: any) => {
+      console.log('Processing file:', file.originalname);
+      const extension = path.extname(file.originalname);
+      const filename = uuidv4() + extension;
+      console.log('Generated filename:', filename);
+      const blob = bucket.file(filename);
+      const blobStream = blob.createWriteStream({
+        metadata: { contentType: file.mimetype },
+      });
+
+      return new Promise<string>((resolve, reject) => {
+        blobStream.on('finish', () => {
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+          resolve(publicUrl);
+        });
+        blobStream.on('error', (err) => {
+          console.error('Error during blob streaming:', err);
+          reject(err);
+        });
+        blobStream.end(file.buffer);
+      });
+    });
+
+    Promise.all(promises)
+      .then((fileNames) => {
+        console.log('All files processed:', fileNames);
+        req.body.images = fileNames;
+        next();
+      })
+      .catch((err) => {
+        console.error('Error during Promise.all execution:', err);
+        next(err);
+      });
+  },
+  async (req: Request, res: Response) => {
+    try {
+      const images = req.body.images || [];
+      const productData = req.body;
+      const mainImage = images[0];
+      const additionalImages = images.slice(1);
+
+      console.log('Product data:', productData);
+
+      const existingProduct = await Product.findOne({ name: productData.name });
+      if (existingProduct) {
+        console.log('Product with this name already exists:', existingProduct);
+        return res.status(400).json({ message: 'Product with this name already exists.' });
+      }
+
+      const newProduct = new Product({
+        ...productData,
+        mainImage,
+        additionalImages,
+      });
+
+      console.log('New product:', newProduct);
+
+      await newProduct.save();
+
+      const supplier = await Supplier.findById(productData.supplier);
+      if (supplier) {
+        supplier.products.push(newProduct._id);
+        await supplier.save();
+      }
+
+      console.log('Product created successfully:', newProduct);
+
+      res.status(201).json(newProduct);
+    } catch (error) {
+      console.error('Error in creating product:', error);
+      res.status(500).json({ message: "Error creating product", error });
+    }
+  }
+];
+
 // Update a product's details
 export const updateProduct = async (req: Request, res: Response) => {
     try {

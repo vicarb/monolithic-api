@@ -22,7 +22,7 @@ const SupplierSchema: Schema = new Schema({
         type: String,
         required: true,
         default: 'DefaultCategory',
-        enum: ['Indumentaria', 'Alimentaci', 'DefaultCategory'] // Predefined categories
+        enum: ['Indumentaria', 'Alimentación', 'DefaultCategory'] // Predefined categories
     },
     description: {
         type: String,
