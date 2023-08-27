@@ -12,4 +12,5 @@ export interface ISupplier extends IUser {
   contactPhone: string;
   companyName: string;
   industry: string;
+  password:string;
 }

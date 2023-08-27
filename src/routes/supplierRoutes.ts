@@ -1,11 +1,14 @@
 import express from 'express';
-import { 
-    getSuppliers, 
-    getSupplier, 
-    createSupplier, 
-    updateSupplier, 
-    deleteSupplier 
-} from '../controllers/supplierController';
+import {
+    getSuppliers,
+    getSupplier,
+    createSupplier,
+    updateSupplier,
+    deleteSupplier,
+    registerSupplier, 
+    loginSupplier     
+  } from '../controllers/supplierController';
+  
 
 const router = express.Router();
 
@@ -104,5 +107,51 @@ router
  *         description: Deleted
  */
     .delete(deleteSupplier);
+
+// Register a new supplier
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Register a new supplier
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Supplier'
+ *     responses:
+ *       201:
+ *         description: Supplier Registered
+ */
+router
+    .route('/register')
+    .post(registerSupplier);
+
+// Login an existing supplier
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login an existing supplier
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Logged In
+ */
+router
+    .route('/login')
+    .post(loginSupplier);
+
 
 export default router;

@@ -50,7 +50,12 @@ const SupplierSchema: Schema = new Schema({
   industry: {
     type: String,
     required: true
-  }
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 8
+  },
 });
 
 const Supplier = mongoose.model<ISupplierDocument>('Supplier', SupplierSchema);
