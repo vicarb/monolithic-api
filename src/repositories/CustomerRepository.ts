@@ -7,6 +7,9 @@ export class CustomerRepository implements ICustomerRepository {
     return await CustomerModel.create(customer);
   }
 
+  async getCustomerByEmail(email: string): Promise<ICustomer | null> {
+    return await CustomerModel.findOne({ email });
+  }
   async getCustomerById(id: string): Promise<ICustomer | null> {
     return await CustomerModel.findById(id);
   }

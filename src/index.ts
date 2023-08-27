@@ -4,6 +4,7 @@ import connectDB from './config/db';  // Import the connectDB function
 import supplierRoutes from './routes/supplierRoutes'; // Make sure the path is correct
 import productRoutes from './routes/productRoutes'; 
 import testRoute from './routes/testRoute';
+import { customerRouter } from './controllers/customerController';
 
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
@@ -33,6 +34,7 @@ app.use((req, res, next) => {
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api', testRoute);
+app.use('/api/customer', customerRouter)
 
 
 // Basic Route
