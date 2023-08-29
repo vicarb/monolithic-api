@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
-import connectDB from './config/db';  // Import the connectDB function
-import supplierRoutes from './routes/supplierRoutes'; // Make sure the path is correct
+import connectDB from './config/db'; 
+import supplierRoutes from './routes/supplierRoutes'; 
 import productRoutes from './routes/productRoutes'; 
 import testRoute from './routes/testRoute';
 import { customerRouter } from './controllers/customerController';
@@ -23,7 +23,7 @@ app.use(cors());
 
 // Middleware to parse incoming requests with JSON payloads
 app.use(express.json());
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use((req, res, next) => {
     console.log(`Received ${req.method} request to ${req.url}`);
     next();
